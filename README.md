@@ -18,3 +18,14 @@ Original models:
 - 🤗 [Stable Audio 3 on Hugging Face](https://huggingface.co/collections/stabilityai/stable-audio-3)
 
 See the examples in [`crates/stable-audio/examples`](crates/stable-audio/examples).
+
+## Python
+
+Python `ctypes` bindings are available in [`python/stableaudio`](python/stableaudio).
+
+```bash
+cargo build -p stable-audio-capi
+cd python/stableaudio
+uv run python examples/small_sfx.py
+uv run python examples/gradio_app.py
+```
