@@ -1,5 +1,7 @@
 # stableaudio-rs
 
+Generate music and sound effects locally in Rust with Stable Audio 3 GGUF models.
+
 Rust GGUF inference for Stable Audio 3 models.
 
 Original models:
