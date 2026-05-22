@@ -14,6 +14,14 @@ OUTPUT_DIR = APP_DIR / "output"
 _MODEL: StableAudio | None = None
 _MODEL_KEY: str | None = None
 
+CSS = """
+#app { max-width: 1120px; margin: 0 auto; }
+#header h1 { margin-bottom: 0.15rem; }
+#header p { margin-top: 0; color: var(--body-text-color-subdued); }
+#run-button { min-height: 44px; }
+.compact-output textarea { font-size: 0.9rem !important; }
+"""
+
 
 def _choices() -> list[tuple[str, str]]:
     return [(spec.label, key) for key, spec in MODELS.items()]
@@ -61,22 +69,50 @@ def generate(model_key: str, prompt: str, seconds: float, steps: int, seed: int,
     output = OUTPUT_DIR / f"{model_key}-{seed}.wav"
     output = _MODEL.generate_wav(prompt, output, seconds=seconds, steps=steps, seed=seed)
     progress(1.0, desc="Done")
-    return str(output), f"Wrote {output}"
+    return str(output), f"Ready: {output}"
 
 
-with gr.Blocks(title="stableaudio-rs") as demo:
-    gr.Markdown("# stableaudio-rs")
-    gr.Markdown("Generate music and sound effects locally with Stable Audio 3 Q8 GGUF models.")
-    with gr.Row():
-        model = gr.Dropdown(_choices(), value="small-sfx", label="Model")
-        seconds = gr.Number(value=MODELS["small-sfx"].seconds, label="Seconds", precision=1)
-        steps = gr.Slider(1, 16, value=8, step=1, label="Steps")
-        seed = gr.Number(value=777, label="Seed", precision=0)
-    prompt = gr.Textbox(value=MODELS["small-sfx"].default_prompt, label="Prompt", lines=3)
-    suggestions = gr.Radio(_prompt_choices("small-sfx"), label="Prompt suggestions")
-    run = gr.Button("Generate")
-    audio = gr.Audio(label="Output", type="filepath")
-    status = gr.Textbox(label="Status", interactive=False)
+theme = gr.themes.Soft(
+    primary_hue="indigo",
+    secondary_hue="slate",
+    neutral_hue="zinc",
+)
+
+with gr.Blocks(title="stableaudio-rs", fill_width=True) as demo:
+    with gr.Column(elem_id="app"):
+        gr.Markdown(
+            "# stableaudio-rs\nGenerate music and sound effects locally with Stable Audio 3 Q8 GGUF models.",
+            elem_id="header",
+        )
+        with gr.Row(equal_height=False):
+            with gr.Column(scale=7, min_width=420):
+                model = gr.Dropdown(_choices(), value="small-sfx", label="Model")
+                prompt = gr.Textbox(
+                    value=MODELS["small-sfx"].default_prompt,
+                    label="Prompt",
+                    lines=5,
+                    max_lines=8,
+                    placeholder="Describe the sound or music you want to generate...",
+                )
+                suggestions = gr.Radio(_prompt_choices("small-sfx"), label="Prompt suggestions")
+                run = gr.Button("Generate", variant="primary", elem_id="run-button")
+
+            with gr.Column(scale=5, min_width=320):
+                audio = gr.Audio(label="Output", type="filepath", autoplay=False)
+                status = gr.Textbox(
+                    label="Status",
+                    interactive=False,
+                    max_lines=2,
+                    elem_classes=["compact-output"],
+                )
+                with gr.Accordion("Generation settings", open=True):
+                    seconds = gr.Number(
+                        value=MODELS["small-sfx"].seconds,
+                        label="Seconds",
+                        precision=1,
+                    )
+                    steps = gr.Slider(1, 16, value=8, step=1, label="Steps")
+                    seed = gr.Number(value=777, label="Seed", precision=0)
 
     model.change(on_model_change, inputs=model, outputs=[prompt, suggestions, seconds])
     suggestions.change(use_suggestion, inputs=suggestions, outputs=prompt)
@@ -84,4 +120,4 @@ with gr.Blocks(title="stableaudio-rs") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(allowed_paths=[str(OUTPUT_DIR)])
+    demo.launch(allowed_paths=[str(OUTPUT_DIR)], theme=theme, css=CSS)
