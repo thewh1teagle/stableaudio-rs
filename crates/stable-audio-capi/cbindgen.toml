@@ -1,0 +1,13 @@
+language = "C"
+include_guard = "STABLE_AUDIO_H"
+pragma_once = true
+style = "type"
+usize_is_size_t = true
+documentation = true
+
+header = """
+/* AUTO-GENERATED WITH CBINDGEN. DO NOT EDIT BY HAND.
+   REGENERATE WITH:
+   cbindgen crates/stable-audio-capi --crate stable-audio-capi --output crates/stable-audio-capi/include/stable_audio.h
+*/
+"""
