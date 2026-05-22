@@ -1,7 +1,10 @@
 /*
 Download Q8 model bundle:
 
+    # small-music provides the shared T5 text encoder used by every model
+    wget https://github.com/thewh1teagle/stableaudio-rs/releases/download/models-v0.1.0/stable-audio-3-small-music-q8_0.tar.gz
     wget https://github.com/thewh1teagle/stableaudio-rs/releases/download/models-v0.1.0/stable-audio-3-medium-q8_0.tar.gz
+    tar -xzf stable-audio-3-small-music-q8_0.tar.gz
     tar -xzf stable-audio-3-medium-q8_0.tar.gz
 
 Run:
