@@ -8,6 +8,16 @@ Build the C API first:
 cargo build -p stable-audio-capi
 ```
 
+No library path export is needed when running from this repository. The Python
+package searches parent directories for `target/debug/libstable_audio_capi.so`
+or `target/release/libstable_audio_capi.so`.
+
+If the shared library is somewhere else, set:
+
+```bash
+export STABLE_AUDIO_CAPI_LIB=/path/to/libstable_audio_capi.so
+```
+
 Run the small SFX example from this directory:
 
 ```bash
