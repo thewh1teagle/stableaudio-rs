@@ -1,0 +1,25 @@
+[project]
+name = "stable-audio-gguf-tools"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "yakov", email = "61390950+thewh1teagle@users.noreply.github.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "gguf>=0.19.0",
+    "numpy>=2.2.6",
+    "safetensors>=0.7.0",
+    "tokenizers>=0.22.2",
+    "torch>=2.11.0",
+    "tqdm>=4.67.3",
+    "transformers>=5.8.0",
+]
+
+[project.scripts]
+stable-audio-gguf-tools = "stable_audio_gguf_tools:main"
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"

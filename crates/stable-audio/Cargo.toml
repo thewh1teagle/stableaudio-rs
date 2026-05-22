@@ -1,0 +1,21 @@
+[package]
+name = "stable-audio"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+metal = ["llama-rs-sys/metal"]
+vulkan = ["llama-rs-sys/vulkan"]
+
+[dependencies]
+llama-rs-sys = { path = "../llama-rs-sys" }
+half = "2.7.1"
+hound = "3.5.1"
+rand = "0.9.4"
+rand_distr = "0.5.1"
+thiserror = "2.0.18"
+tokenizers = "0.21.4"
+
+[dev-dependencies]
+clap = { version = "4.5.53", features = ["derive"] }

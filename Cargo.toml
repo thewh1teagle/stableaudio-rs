@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "crates/llama-rs-sys",
+    "crates/stable-audio",
+]
+resolver = "2"
+

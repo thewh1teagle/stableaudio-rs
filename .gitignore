@@ -1,0 +1,35 @@
+# Rust
+/target/
+**/target/
+Cargo.lock.bak
+
+# Python
+.venv/
+**/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Generated model and audio artifacts
+models/
+**/models/
+output/
+**/output/
+dist/
+**/dist/
+
+# Local prototypes from the source workspace, not part of this crate workspace
+/plans/
+
+# Native build outputs
+build/
+cmake-build-*/
+
+# Editor and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
