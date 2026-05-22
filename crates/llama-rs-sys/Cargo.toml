@@ -12,3 +12,6 @@ vulkan = []
 [build-dependencies]
 bindgen = "0.71.1"
 cmake = "0.1.54"
+flate2 = "1.1.2"
+tar = "0.4.44"
+ureq = "3.0.12"

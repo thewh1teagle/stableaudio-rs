@@ -1,8 +1,10 @@
 use std::env;
+use std::fs::File;
+use std::io::BufReader;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-const LLAMA_CPP_REV: &str = "b8941";
+const LLAMA_CPP_COMMIT: &str = "06a811d08529b202f2b0002f9be61d4c75d5f9d5";
 
 fn main() {
     println!("cargo:rerun-if-env-changed=GGML_RS_SOURCE_DIR");
@@ -31,26 +33,43 @@ fn ggml_source_dir() -> PathBuf {
     }
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let llama_dir = out_dir.join("llama.cpp");
+    let llama_dir = out_dir.join(format!("llama.cpp-{LLAMA_CPP_COMMIT}"));
     if !llama_dir.exists() {
-        let status = Command::new("git")
-            .args([
-                "clone",
-                "--depth",
-                "1",
-                "--branch",
-                LLAMA_CPP_REV,
-                "https://github.com/ggml-org/llama.cpp.git",
-            ])
-            .arg(&llama_dir)
-            .status()
-            .expect("failed to spawn git clone for llama.cpp");
-        assert!(
-            status.success(),
-            "failed to clone llama.cpp {LLAMA_CPP_REV}"
-        );
+        fetch_llama_cpp(&out_dir, &llama_dir);
     }
     llama_dir.join("ggml")
+}
+
+fn fetch_llama_cpp(out_dir: &Path, llama_dir: &Path) {
+    let archive_path = out_dir.join(format!("llama.cpp-{LLAMA_CPP_COMMIT}.tar.gz"));
+    if !archive_path.exists() {
+        let url =
+            format!("https://github.com/ggml-org/llama.cpp/archive/{LLAMA_CPP_COMMIT}.tar.gz");
+        println!("cargo:warning=downloading llama.cpp source archive from {url}");
+        let mut response = ureq::get(&url)
+            .call()
+            .expect("failed to download llama.cpp source archive");
+        let mut reader = response.body_mut().as_reader();
+        let mut file =
+            File::create(&archive_path).expect("failed to create llama.cpp archive file");
+        std::io::copy(&mut reader, &mut file).expect("failed to write llama.cpp archive file");
+    }
+
+    println!(
+        "cargo:warning=extracting llama.cpp source archive to {}",
+        out_dir.display()
+    );
+    let file = File::open(&archive_path).expect("failed to open llama.cpp source archive");
+    let decoder = flate2::read::GzDecoder::new(BufReader::new(file));
+    let mut archive = tar::Archive::new(decoder);
+    archive
+        .unpack(out_dir)
+        .expect("failed to extract llama.cpp source archive");
+    assert!(
+        llama_dir.join("ggml").exists(),
+        "llama.cpp archive did not contain expected ggml directory at {}",
+        llama_dir.join("ggml").display()
+    );
 }
 
 fn build_ggml(source_dir: &Path) -> PathBuf {
