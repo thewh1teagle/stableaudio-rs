@@ -38,12 +38,12 @@ MODELS = {
         dit="models/gguf-q8_0/sa3-small-sfx-dit.gguf",
         decoder="models/gguf-q8_0/sa3-same-s-decoder.gguf",
         text_encoder="models/gguf-q8_0/t5gemma-b-b-ul2-encoder.gguf",
-        default_prompt="crystalline robot power up, sparkling servo chirps, deep digital whoosh",
+        default_prompt="High-fidelity sci-fi robot powering up, intricate mechanical clicks, sparkling synthetic chirps, deep digital whoosh, isolated sound effect, clean background",
         seconds=3.0,
         suggestions=(
-            "cinematic laser blast with glassy tail and deep impact",
-            "tiny magical UI notification, soft sparkle, clean chime",
-            "heavy sci fi door opens with hydraulic hiss and low rumble",
+            "Cinematic futuristic laser blast, sharp plasma discharge, resonant glassy reverb tail, heavy low-end sub impact",
+            "Charming magical UI notification chime, crystalline glass texture, soft high-pitched sparkle, brief acoustic resonance",
+            "Heavy armored sci-fi blast door opening, sudden mechanical lock release, pressurized hydraulic hiss, deep metallic grinding rumble",
         ),
     ),
     "small-music": ModelSpec(
@@ -53,12 +53,12 @@ MODELS = {
         dit="models/gguf-q8_0/sa3-small-music-dit.gguf",
         decoder="models/gguf-q8_0/sa3-small-music-same-s-decoder.gguf",
         text_encoder="models/gguf-q8_0/t5gemma-b-b-ul2-encoder.gguf",
-        default_prompt="continuous upbeat electro funk groove, steady drums throughout, warm bassline",
-        seconds=6.0,
+        default_prompt="Upbeat 115 BPM electro-funk groove, tight syncopated studio drums, warm driving analog bassline, rhythmic muted guitar chops, bright vintage synthesizer chords",
+        seconds=25.0,
         suggestions=(
-            "continuous synthwave loop, punchy drums, warm bass, sparkling arpeggios",
-            "lofi house groove, dusty drums, mellow keys, smooth bassline",
-            "ambient piano and soft pads, gentle pulse, no fade out",
+            "Retro 1980s synthwave instrumental, 120 BPM, punchy electronic snare, warm driving bassline, cascading neon arpeggios, nostalgic cinematic mood",
+            "Late-night lofi house groove, 124 BPM, dusty vinyl crackle texture, warm sub-bass, atmospheric Rhodes piano chords, sidechained four-on-the-floor kick",
+            "Minimalist ambient piano melody, lush evolving synthesizer pads, gentle warm low-frequency pulse, cinematic, emotional texture",
         ),
     ),
     "medium": ModelSpec(
@@ -69,14 +69,14 @@ MODELS = {
         decoder="models/gguf-q8_0/sa3-medium-same-l-decoder.gguf",
         text_encoder="models/gguf-q8_0/t5gemma-b-b-ul2-encoder.gguf",
         default_prompt=(
-            "continuous 10 second futuristic electro funk track, tight steady drums throughout, "
-            "warm slap bass groove, bright synth stabs"
+            "Dynamic 25-second futuristic electro-funk arrangement, 118 BPM, crisp acoustic drum break, "
+            "bouncy slap bass groove, bright vintage synth stabs, professional studio master"
         ),
-        seconds=10.0,
+        seconds=25.0,
         suggestions=(
-            "cinematic electronic score, pulsing analog bass, wide synth chords, heroic melody",
-            "futuristic desert chase soundtrack, breakbeat drums, metallic percussion, tense strings",
-            "dreamy piano arpeggio, orchestral electronic drums, warm evolving pads",
+            "Epic cinematic electronic trailer score, pulsing analog synth bass, wide orchestral brass pads, soaring heroic lead melody, dramatic rising tension",
+            "High-octane cyberpunk desert chase soundtrack, fast 140 BPM breakbeat drums, industrial metallic percussion, aggressive staccato strings, dark gritty reese bass",
+            "Dreamy neoclassical electronic crossover, delicate grand piano arpeggios, cinematic hybrid orchestral drums, warm evolving ambient pads, hopeful mood",
         ),
         dependencies=("small-music",),
     ),
