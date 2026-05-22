@@ -4,8 +4,8 @@ Python `ctypes` bindings for the local `stable-audio-capi` shared library.
 
 Prerequisites:
 
-- Rust/Cargo
-- uv
+- [Rust/Cargo](https://www.rust-lang.org/tools/install)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 Build the C API first:
 
