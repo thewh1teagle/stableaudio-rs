@@ -41,7 +41,12 @@ def use_suggestion(prompt: str) -> str:
 def generate(model_key: str, prompt: str, seconds: float, steps: int, seed: int, progress=gr.Progress()):
     global _MODEL, _MODEL_KEY
     progress(0.05, desc="Checking model files")
-    ensure_model(model_key, ROOT)
+
+    def model_progress(fraction: float | None, desc: str) -> None:
+        value = 0.10 if fraction is None else 0.10 + (fraction * 0.35)
+        progress(value, desc=desc)
+
+    ensure_model(model_key, ROOT, progress=model_progress)
 
     if _MODEL_KEY != model_key:
         if _MODEL is not None:

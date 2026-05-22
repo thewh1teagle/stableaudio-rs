@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 import tarfile
@@ -8,6 +9,7 @@ import httpx
 
 
 RELEASE_BASE = "https://github.com/thewh1teagle/stableaudio-rs/releases/download/models-v0.1.0"
+ProgressCallback = Callable[[float | None, str], None]
 
 
 @dataclass(frozen=True)
@@ -91,29 +93,61 @@ def model_ready(model: str, root: str | Path = ".") -> bool:
     return all(path.exists() for path in model_paths(model, root))
 
 
-def ensure_model(model: str, root: str | Path = ".", delete_archive: bool = True) -> ModelSpec:
+def ensure_model(
+    model: str,
+    root: str | Path = ".",
+    delete_archive: bool = True,
+    progress: ProgressCallback | None = None,
+) -> ModelSpec:
     spec = MODELS[model]
     root = Path(root)
     for dependency in spec.dependencies:
-        ensure_model(dependency, root=root, delete_archive=delete_archive)
+        ensure_model(dependency, root=root, delete_archive=delete_archive, progress=progress)
     if not model_ready(model, root):
-        _download_and_extract(spec, root, delete_archive=delete_archive)
+        _download_and_extract(spec, root, delete_archive=delete_archive, progress=progress)
+    elif progress is not None:
+        progress(1.0, f"{spec.label} model ready")
     return spec
 
 
-def _download_and_extract(spec: ModelSpec, root: Path, delete_archive: bool) -> None:
+def _download_and_extract(
+    spec: ModelSpec,
+    root: Path,
+    delete_archive: bool,
+    progress: ProgressCallback | None,
+) -> None:
     root.mkdir(parents=True, exist_ok=True)
     archive_path = root / spec.archive
     if not archive_path.exists():
         with httpx.stream("GET", spec.url, follow_redirects=True, timeout=None) as response:
             response.raise_for_status()
+            total = int(response.headers.get("content-length", "0") or "0")
+            downloaded = 0
             with archive_path.open("wb") as file:
                 for chunk in response.iter_bytes():
                     if chunk:
                         file.write(chunk)
+                        downloaded += len(chunk)
+                        if progress is not None:
+                            progress(
+                                downloaded / total if total else None,
+                                _download_status(spec.archive, downloaded, total),
+                            )
+    if progress is not None:
+        progress(1.0, f"Extracting {spec.archive}")
     _safe_extract(archive_path, root)
     if delete_archive:
         archive_path.unlink(missing_ok=True)
+    if progress is not None:
+        progress(1.0, f"{spec.label} model ready")
+
+
+def _download_status(archive: str, downloaded: int, total: int) -> str:
+    downloaded_mb = downloaded / 1024 / 1024
+    if total:
+        total_mb = total / 1024 / 1024
+        return f"Downloading {archive}: {downloaded_mb:.1f}/{total_mb:.1f} MB"
+    return f"Downloading {archive}: {downloaded_mb:.1f} MB"
 
 
 def _safe_extract(archive_path: Path, root: Path) -> None:
