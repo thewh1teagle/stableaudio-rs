@@ -2,6 +2,6 @@
 members = [
     "crates/llama-rs-sys",
     "crates/stable-audio",
+    "crates/stable-audio-capi",
 ]
 resolver = "2"
-

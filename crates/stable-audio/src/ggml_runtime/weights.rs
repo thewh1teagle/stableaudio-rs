@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::ffi::CString;
 use std::ptr;
 
-use llama_rs_sys as ffi;
 use half::f16;
+use llama_rs_sys as ffi;
 
 use crate::ggml_runtime::gguf::GgufModel;
 use crate::{Error, Result};

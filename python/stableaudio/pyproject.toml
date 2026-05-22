@@ -1,0 +1,14 @@
+[project]
+name = "stableaudio"
+version = "0.1.0"
+description = "Python bindings for stableaudio-rs"
+readme = "README.md"
+authors = [
+    { name = "yakov", email = "61390950+thewh1teagle@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.9.13,<0.10.0"]
+build-backend = "uv_build"

@@ -181,10 +181,7 @@ impl GgmlWeights {
         }
 
         let mut pieces = Vec::new();
-        let first = self.decode_same_l_inner(
-            &latents[..LATENT as usize * kernel],
-            kernel,
-        )?;
+        let first = self.decode_same_l_inner(&latents[..LATENT as usize * kernel], kernel)?;
         let valid_first = chunk_size + overlap;
         pieces.extend_from_slice(&first[..valid_first * SIN_PER_POS * OUT_CHANNELS]);
         let mut i = valid_first;

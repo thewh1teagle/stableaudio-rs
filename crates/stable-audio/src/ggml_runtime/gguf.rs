@@ -4,8 +4,8 @@ use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::ptr;
 
-use llama_rs_sys as ffi;
 use half::f16;
+use llama_rs_sys as ffi;
 
 use crate::error::{Error, Result};
 use crate::ggml_runtime::tensors::TensorType;

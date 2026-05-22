@@ -1,0 +1,17 @@
+[package]
+name = "stable-audio-capi"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "stable_audio_capi"
+crate-type = ["cdylib", "staticlib"]
+
+[features]
+default = []
+metal = ["stable-audio/metal"]
+vulkan = ["stable-audio/vulkan"]
+
+[dependencies]
+stable-audio = { path = "../stable-audio" }
+
