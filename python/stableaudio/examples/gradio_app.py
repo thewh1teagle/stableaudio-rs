@@ -9,7 +9,8 @@ from stableaudio.models import MODELS, ensure_model, model_paths
 
 
 ROOT = Path(__file__).resolve().parents[3]
-OUTPUT = ROOT / "output/gradio.wav"
+APP_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = APP_DIR / "output"
 _MODEL: StableAudio | None = None
 _MODEL_KEY: str | None = None
 
@@ -52,7 +53,8 @@ def generate(model_key: str, prompt: str, seconds: float, steps: int, seed: int,
 
     progress(0.55, desc="Generating audio")
     assert _MODEL is not None
-    output = _MODEL.generate_wav(prompt, OUTPUT, seconds=seconds, steps=steps, seed=seed)
+    output = OUTPUT_DIR / f"{model_key}-{seed}.wav"
+    output = _MODEL.generate_wav(prompt, output, seconds=seconds, steps=steps, seed=seed)
     progress(1.0, desc="Done")
     return str(output), f"Wrote {output}"
 
@@ -77,4 +79,4 @@ with gr.Blocks(title="stableaudio-rs") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(allowed_paths=[str(OUTPUT_DIR)])
