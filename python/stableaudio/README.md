@@ -2,6 +2,11 @@
 
 Python `ctypes` bindings for the local `stable-audio-capi` shared library.
 
+Prerequisites:
+
+- Rust/Cargo
+- uv
+
 Build the C API first:
 
 ```bash
