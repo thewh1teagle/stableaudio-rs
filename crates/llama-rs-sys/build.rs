@@ -77,7 +77,10 @@ fn build_ggml(source_dir: &Path) -> PathBuf {
     let mut config = cmake::Config::new(&wrapper_dir);
     if cfg!(target_os = "windows") {
         config.generator("Ninja");
+        config.static_crt(true);
         config
+            .define("CMAKE_POLICY_DEFAULT_CMP0091", "NEW")
+            .define("CMAKE_MSVC_RUNTIME_LIBRARY", "MultiThreaded")
             .define("CMAKE_TRY_COMPILE_CONFIGURATION", "Release")
             .define("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT", "Embedded");
     }
