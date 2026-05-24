@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use llama_rs_sys as ffi;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("I/O error: {0}")]
@@ -40,7 +42,10 @@ pub enum Error {
     },
 
     #[error("unsupported tensor type for {name}: {tensor_type}")]
-    UnsupportedTensorType { name: String, tensor_type: u32 },
+    UnsupportedTensorType {
+        name: String,
+        tensor_type: ffi::ggml_type,
+    },
 
     #[error("ggml error: {0}")]
     Ggml(String),

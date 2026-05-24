@@ -276,7 +276,7 @@ impl Drop for GgmlWeights {
 
 struct TensorSpec {
     name: String,
-    tensor_type: u32,
+    tensor_type: ffi::ggml_type,
     shape: Vec<usize>,
     index: i64,
 }
