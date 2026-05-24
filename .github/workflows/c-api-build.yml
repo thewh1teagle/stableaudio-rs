@@ -1,0 +1,90 @@
+name: C API Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            features: vulkan
+            lib: libstable_audio_capi.so
+          - name: linux-aarch64
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            features: vulkan
+            lib: libstable_audio_capi.so
+          - name: macos-aarch64
+            os: macos-14
+            target: aarch64-apple-darwin
+            features: metal
+            lib: libstable_audio_capi.dylib
+          - name: windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            features: vulkan
+            lib: stable_audio_capi.dll
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Install Linux Vulkan SDK packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y glslang-tools glslc libvulkan-dev ninja-build spirv-headers spirv-tools
+
+      - name: Install Windows Vulkan SDK
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install vulkan-sdk -y --no-progress
+          $roots = @("${env:ProgramFiles}\VulkanSDK", "C:\VulkanSDK")
+          $sdk = $roots |
+            Where-Object { Test-Path $_ } |
+            ForEach-Object { Get-ChildItem $_ -Directory } |
+            Sort-Object Name -Descending |
+            Select-Object -First 1
+          if (-not $sdk) {
+            throw "Vulkan SDK directory not found"
+          }
+          "VULKAN_SDK=$($sdk.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "$($sdk.FullName)\Bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          "$($sdk.FullName)\Lib" | Out-File -FilePath $env:GITHUB_PATH -Append
+          "CARGO_TARGET_DIR=D:/t" | Out-File -FilePath $env:GITHUB_ENV -Append
+          & "$($sdk.FullName)\Bin\glslc.exe" --version
+
+      - name: Build C API
+        run: cargo build --release -p stable-audio-capi --target ${{ matrix.target }} --no-default-features --features ${{ matrix.features }}
+
+      - name: Verify Unix library
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          test -f "target/${{ matrix.target }}/release/${{ matrix.lib }}"
+
+      - name: Verify Windows library
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $targetDir = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { "target" }
+          if (-not (Test-Path "$targetDir/${{ matrix.target }}/release/${{ matrix.lib }}")) {
+            throw "Expected C API library was not built"
+          }

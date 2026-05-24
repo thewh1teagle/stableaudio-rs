@@ -77,6 +77,9 @@ fn build_ggml(source_dir: &Path) -> PathBuf {
     let mut config = cmake::Config::new(&wrapper_dir);
     if cfg!(target_os = "windows") {
         config.generator("Ninja");
+        config
+            .define("CMAKE_TRY_COMPILE_CONFIGURATION", "Release")
+            .define("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT", "Embedded");
     }
     config
         .profile("Release")
@@ -87,6 +90,7 @@ fn build_ggml(source_dir: &Path) -> PathBuf {
         .define("GGML_BACKEND_DL", "OFF")
         .define("GGML_NATIVE", "OFF")
         .define("GGML_CPU", "ON")
+        .define("GGML_ACCELERATE", accelerate_enabled())
         .define("GGML_METAL", metal_enabled())
         .define("GGML_METAL_EMBED_LIBRARY", metal_enabled())
         .define("GGML_VULKAN", vulkan_enabled());
@@ -205,6 +209,7 @@ fn link_platform_libs() {
             );
         }
         println!("cargo:rustc-link-lib=vulkan-1");
+        println!("cargo:rustc-link-lib=advapi32");
     }
 }
 
@@ -238,6 +243,14 @@ fn vulkan_enabled() -> &'static str {
     if cfg!(feature = "vulkan")
         || ((cfg!(target_os = "linux") || cfg!(target_os = "windows")) && !cfg!(feature = "metal"))
     {
+        "ON"
+    } else {
+        "OFF"
+    }
+}
+
+fn accelerate_enabled() -> &'static str {
+    if cfg!(target_os = "macos") {
         "ON"
     } else {
         "OFF"
