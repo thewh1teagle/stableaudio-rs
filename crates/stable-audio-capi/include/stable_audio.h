@@ -25,11 +25,45 @@ StableAudioModel *stable_audio_model_load(const char *dit_path,
                                           size_t steps,
                                           uint64_t seed);
 
+StableAudioModel *stable_audio_model_load_with_encoder(const char *dit_path,
+                                                       const char *encoder_path,
+                                                       const char *decoder_path,
+                                                       const char *text_encoder_path,
+                                                       size_t steps,
+                                                       uint64_t seed);
+
 void stable_audio_model_free(StableAudioModel *model);
 
 int stable_audio_generate_wav(StableAudioModel *model,
                               const char *prompt,
                               float seconds,
+                              size_t steps,
+                              uint64_t seed,
+                              const char *output_path);
+
+int stable_audio_edit_wav(StableAudioModel *model,
+                          const char *prompt,
+                          const char *input_path,
+                          float seconds,
+                          size_t steps,
+                          uint64_t seed,
+                          float init_noise_level,
+                          const char *output_path);
+
+int stable_audio_inpaint_wav(StableAudioModel *model,
+                             const char *prompt,
+                             const char *input_path,
+                             float seconds,
+                             size_t steps,
+                             uint64_t seed,
+                             float inpaint_start,
+                             float inpaint_end,
+                             const char *output_path);
+
+int stable_audio_continue_wav(StableAudioModel *model,
+                              const char *prompt,
+                              const char *input_path,
+                              float extend_seconds,
                               size_t steps,
                               uint64_t seed,
                               const char *output_path);
