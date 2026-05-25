@@ -233,6 +233,33 @@ def _iter_same_decoder(path: Path):
             yield "decoder.layers.3.mapping.weight", fused_mapping
 
 
+def _iter_same_encoder(path: Path):
+    prefix = "pretransform.model."
+    weight_g_key = prefix + "encoder.layers.0.mapping.weight_g"
+    weight_v_key = prefix + "encoder.layers.0.mapping.weight_v"
+    weight_key = prefix + "encoder.layers.0.mapping.weight"
+    with safe_open(path, framework="pt", device="cpu") as f:
+        keys = set(f.keys())
+        fused_mapping = None
+        if weight_g_key in keys and weight_v_key in keys:
+            weight_g = f.get_tensor(weight_g_key).float()
+            weight_v = f.get_tensor(weight_v_key).float()
+            fused_mapping = weight_v * (
+                weight_g / weight_v.norm(dim=(1, 2), keepdim=True).clamp_min(1e-12)
+            )
+        for key in f.keys():
+            if not key.startswith(("pretransform.model.encoder.", "pretransform.model.bottleneck.")):
+                continue
+            if key in (weight_g_key, weight_v_key):
+                continue
+            if fused_mapping is not None and key == weight_key:
+                continue
+            out = key[len(prefix) :] if key.startswith(prefix) else key
+            yield out, f.get_tensor(key)
+        if fused_mapping is not None:
+            yield "encoder.layers.0.mapping.weight", fused_mapping
+
+
 def _repo_snapshot(local_dir: Path | None, repo_id: str) -> Path:
     if local_dir is not None:
         return local_dir
@@ -283,6 +310,9 @@ def convert(snapshot: Path, output_dir: Path, out_type: str, repo_id: str) -> No
     decoder_filename = (
         "sa3-same-s-decoder.gguf" if is_legacy_sfx else f"sa3-{slug}-{decoder_kind}-decoder.gguf"
     )
+    encoder_filename = (
+        "sa3-same-s-encoder.gguf" if is_legacy_sfx else f"sa3-{slug}-{decoder_kind}-encoder.gguf"
+    )
     title = slug.replace("-", " ").title()
 
     dit_meta = {
@@ -324,6 +354,24 @@ def convert(snapshot: Path, output_dir: Path, out_type: str, repo_id: str) -> No
         out_type,
     )
     LOG.info("wrote decoder tensors: %s", n)
+
+    enc_meta = {
+        **common,
+        "sa3.component": f"{decoder_kind}-encoder",
+        "sa3.latent_dim": int(ae_cfg["latent_dim"]),
+        "sa3.downsampling_ratio": int(ae_cfg["downsampling_ratio"]),
+        "sa3.patch_size": int(ae_cfg["pretransform"]["config"]["patch_size"]),
+        "sa3.encoder_channels": int(ae_cfg["encoder"]["config"]["channels"]),
+    }
+    n = _write_gguf(
+        output_dir / encoder_filename,
+        f"sa3-{decoder_kind}-encoder",
+        f"{title} {decoder_kind.upper()} encoder",
+        enc_meta,
+        _iter_same_encoder(model_path),
+        out_type,
+    )
+    LOG.info("wrote encoder tensors: %s", n)
 
     t5_meta = {
         **common,
