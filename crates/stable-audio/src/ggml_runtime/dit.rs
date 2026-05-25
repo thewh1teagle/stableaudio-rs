@@ -24,6 +24,7 @@ impl GgmlWeights {
         t_lat: usize,
         cross_attn: &[f32],
         global_cond: &[f32],
+        local_add_cond: Option<&[f32]>,
         timestep_embed: &[f32],
     ) -> Result<DitPrepared> {
         let x_name = CString::new("inp_dit_x").unwrap();
@@ -44,6 +45,11 @@ impl GgmlWeights {
         }
         if global_cond.len() != COND as usize || timestep_embed.len() != 256 {
             return Err(Error::Ggml("DiT conditioning length mismatch".into()));
+        }
+        if let Some(local_add_cond) = local_add_cond {
+            if local_add_cond.len() != PROMPT_PLUS_SECONDS as usize * t_lat {
+                return Err(Error::Ggml("DiT local conditioning length mismatch".into()));
+            }
         }
 
         unsafe {
@@ -176,8 +182,14 @@ impl GgmlWeights {
                 0,
                 std::mem::size_of_val(positions.as_slice()),
             );
-            let local_zeros = vec![0.0f32; PROMPT_PLUS_SECONDS as usize * t_lat];
-            set_input(gf, &local_name, &local_zeros);
+            let local_zeros;
+            let local_values = if let Some(local_add_cond) = local_add_cond {
+                local_add_cond
+            } else {
+                local_zeros = vec![0.0f32; PROMPT_PLUS_SECONDS as usize * t_lat];
+                &local_zeros
+            };
+            set_input(gf, &local_name, local_values);
             let mem_zeros = vec![0.0f32; EMBED as usize * MEMORY as usize];
             set_input(gf, &mem_zero_name, &mem_zeros);
             set_input(gf, &one_name, &[1.0f32]);

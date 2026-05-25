@@ -15,6 +15,7 @@ cargo build -p stable-audio-capi
 THE C HEADER IS GENERATED WITH `CBINDGEN`:
 
 ```bash
+cargo install cargo-binstall
 cargo binstall cbindgen -y
 cbindgen crates/stable-audio-capi \
   --crate stable-audio-capi \
